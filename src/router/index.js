@@ -12,7 +12,9 @@ import ContactsView from '@/views/ContactsView.vue'
 
 
 const routes = [
-  { path: '/admin', name: 'admin', component: AdminPanel },
+  { path: '/', redirect: '/info' },
+  // { path: '/admin', name: 'admin', component: AdminPanel },
+  // { path: '/admin', redirect: '/products' },
   { path: '/info', name: 'landing', component: LandingView },
   { path: '/blog', name: 'blog', component: HomeView },
   { path: '/reviews', name: 'reviews', component: ReviewsView },

@@ -44,7 +44,7 @@ export default {
 
     async loadCache() {
       try {
-        const response = await fetch('http://localhost:3001/api/posts');
+        const response = await fetch('/api/posts');
         const cache = await response.json();
 
         if (Array.isArray(cache.posts)) {

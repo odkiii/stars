@@ -4,7 +4,7 @@
 
    
     <div class="filters-container">
-       <h1 class="filters-header">ТОВАРЫ</h1>
+       <h1 class="filters-header">ГОТОВЫЕ ТОВАРЫ</h1>
       <div class="filters">
         
         <!-- Фильтр по цвету -->
@@ -15,7 +15,7 @@
             <div class="color-dropdown">
             <button class="dropdown-toggle" @click="toggleColorDropdown">
               <i class="fas fa-palette"></i>
-              <span>Цвет</span>
+              <span>Выбрать цвет</span>
             </button>
             <div class="dropdown-menu" v-if="isColorDropdownOpen">
               <div class="color-options">
@@ -31,10 +31,10 @@
                 </div>
                 <div 
                   v-for="color in colors" 
-                  :key="color"
+                  :key="color.en"
                   class="color-option"
-                  :class="{ 'active': filters.color === color }"
-                  @click="selectColor(color)"
+                  :class="{ 'active': filters.color === color.en }"
+                  @click="selectColor(color.en)"
                 >
                   <div class="color-circle">
                     <img :src="`/colors/${color.en}.png`" :alt="color.ru">
@@ -101,18 +101,22 @@
             <span class="price">{{ formatPrice(star.price) }}</span>
           </div>
           <button class="add-to-cart" @click.stop="addToCart(star)">
-            Добавить
+            В КОРЗИНУ
           </button>
         </div>
       </div>
     </div>
-
-    <!-- <QuickViewModal 
-      v-if="showModal" 
-      :star="selectedStar" 
-      @close="showModal = false"
-      @add-to-cart="addToCart"
-    /> -->
+     <div class="star-card create-star-card">
+        <div class="create-star-inner">
+          <div class="create-icon">⭐</div>
+          <h3>Создать свою звезду</h3>
+          <p>Не нашли что искали? Создайте уникальную звезду по вашему вкусу!</p>
+          <router-link to="/create" class="create-star-btn">
+            СОЗДАТЬ
+          </router-link>
+        </div>
+      </div>
+    
   </section>
 </template>
 
@@ -156,6 +160,25 @@ export default {
     await this.loadStars();
   },
   computed: {
+    filteredStars() {
+      return this.stars.filter(star => {
+        // Фильтр по цвету - исправлено сравнение
+        if (this.filters.color && star.color !== this.filters.color) {
+          return false;
+        }
+        
+        // Фильтр по цене
+        if (this.filters.minPrice !== null && star.price < this.filters.minPrice) {
+          return false;
+        }
+        
+        if (this.filters.maxPrice !== null && star.price > this.filters.maxPrice) {
+          return false;
+        }
+        
+        return true;
+      });
+    },
     priceRangeText() {
       if (this.filters.minPrice && this.filters.maxPrice) {
         return `${this.filters.minPrice} - ${this.filters.maxPrice} ₽`
@@ -164,32 +187,14 @@ export default {
       } else if (this.filters.maxPrice) {
         return `До ${this.filters.maxPrice} ₽`
       }
-      return 'Стоимость'
+      return 'Выбрать стоимость'
     },
     availableColors() {
       return [...new Set(this.stars.map(star => star.color))]
     },
-    filteredStars() {
-      return this.stars.filter(star => {
-        // Фильтр по цвету
-        if (this.filters.color && star.color !== this.filters.color) {
-          return false
-        }
-        
-        // Фильтр по цене
-        if (this.filters.minPrice !== null && star.price < this.filters.minPrice) {
-          return false
-        }
-        
-        if (this.filters.maxPrice !== null && star.price > this.filters.maxPrice) {
-          return false
-        }
-        
-        return true
-      })
-    },
+    
     sortedStars() {
-      const stars = [...this.filteredStars]
+      const stars = [...this.filteredStars] // используем computed свойство
       switch (this.sortOption) {
         case 'price-asc':
           return stars.sort((a, b) => a.price - b.price)
@@ -201,9 +206,10 @@ export default {
     }
   },
   methods: {
+    
     async loadStars() {
       try {
-        const response = await fetch('http://localhost:3001/api/products');
+        const response = await fetch('/api/products');
         
         // Проверка типа ответа
         const contentType = response.headers.get('content-type');
@@ -228,9 +234,11 @@ export default {
       if (this.isPriceDropdownOpen) this.isPriceDropdownOpen = false
     },  
     selectColor(color) {
-      this.filters.color = color
-      this.isColorDropdownOpen = false
+      const colorValue = typeof color === 'object' ? color.en : color;
+      this.filters.color = colorValue;
+      this.isColorDropdownOpen = false;
     },
+
     togglePriceDropdown() {
       this.isPriceDropdownOpen = !this.isPriceDropdownOpen
     },
@@ -329,7 +337,42 @@ export default {
 </script>
 
 <style scoped>
+.create-star-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px dashed #2F553D;
+  margin: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
 
+.create-star-inner {
+  text-align: center;
+  padding: 20px;
+}
+
+.create-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.create-star-card h3 {
+  color: #2F553D;
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+}
+
+.create-star-card p {
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.create-star-card .create-star-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+}
 
 .favorite-btn {
   font-family: 'Font Awesome 6 Free';
@@ -799,6 +842,67 @@ h3 {
   color: #ededed;
 }
 
+.no-products-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.message-container {
+  max-width: 500px;
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.no-products-message h2 {
+  color: #333;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.no-products-message p {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.no-products-message .suggestion {
+  color: #4CAF50;
+  font-weight: 500;
+  font-size: 1.2rem;
+  margin: 25px 0;
+}
+
+.create-star-btn {
+  display: inline-block;
+  background: #4CAF50;
+  color: white;
+  padding: 15px 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  border: 2px solid #4CAF50;
+  margin-top: 20px;
+}
+
+.create-star-btn:hover {
+  background: white;
+  color: #4CAF50;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+}
+
+
 @media (max-width: 768px) {
   .filters {
     flex-direction: column;
@@ -836,6 +940,28 @@ h3 {
     width: 100%;
     left: 0;
     right: 0;
+  }
+
+  .no-products-message {
+    min-height: 300px;
+    padding: 20px;
+  }
+  
+  .message-container {
+    padding: 30px 20px;
+  }
+  
+  .no-products-message h2 {
+    font-size: 1.5rem;
+  }
+  
+  .no-products-message p {
+    font-size: 1rem;
+  }
+  
+  .create-star-btn {
+    padding: 12px 25px;
+    font-size: 1rem;
   }
 }
 

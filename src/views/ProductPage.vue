@@ -72,7 +72,7 @@ export default {
     
     async fetchProduct() {
       try {
-        const response = await fetch(`http://localhost:3001/api/products/${this.id}`);
+        const response = await fetch(`/api/products/${this.id}`);
         this.product = await response.json();
       } catch (error) {
         console.error('Ошибка загрузки товара:', error);

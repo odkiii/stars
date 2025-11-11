@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const helmet = require('helmet');
@@ -10,34 +11,45 @@ const path = require('path');
 const jwtDecode = require('jwt-decode');
 const multer = require('multer');
 const { Pool } = require('pg');
-const port = 3001;
+const port = 4000;
 const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { randomUUID } = require('crypto');
 const nodemailer = require('nodemailer');
 
-
 const JWT_SECRET = process.env.JWT_SECRET || '8580a4d1366ee61a885b97ccdd2089d7a354df9477cebbf7973a73b92ca74bdd6cb8087bffd4886913c7b7c669d33c31c6e4392fe31048019c4bc15b1500fa1347e205e3b6243e05f66e3f73af49da2a189d50f4c03487c7a273ed533af79dabe40a2d1045beafe3f3a636023f0fb1e091c7d6392cfca78317be438443487da2ccef3192f457c6bc634efd1782600097dfd00928682d6822541dc1d2b67a6b84e96715d7c5c6db8c3e6f855a1168dcb5085e4761408a279239ae120f053f90885c5fb594c0644896cbfcb73ecfe3c731d605fbde3be734f7ede17ccffc2e6ad3dd5cdc8a0c07a3f10fcb0c57c64bbf686d7d93d8c6b71ee885fcad1702855bf5';
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10);
-const UPLOAD_DIR = process.env.UPLOAD_DIR || '/stars';
-const PUBLIC_STARS = path.join(__dirname, '..', 'public', 'stars'); // если server.js в backend/
+const UPLOAD_DIR = process.env.UPLOAD_DIR || './stars';
+const PUBLIC_STARS = path.join(__dirname, 'public', 'stars'); // если server.js в backend/
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'StarsSite',
-  password: '12345678',
-  port: 5432,
+  user: process.env.PGUSER,
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  password: process.env.PGPASSWORD,
+  port: process.env.PGPORT,
+  // Добавляем повторные попытки подключения
+  retryDelay: 5000,
+  retryLimit: 10,
+});
+
+console.log('🔌 Настройки подключения к БД:', {
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  user: process.env.PGUSER,
+  port: process.env.PGPORT
 });
 
 app.use(helmet());
 app.use(express.json());
 app.use(cors({
-  origin: '*', // заменить на домен
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://звезда-на-елку.рф', 'https://www.звезда-на-елку.рф']
+    : ['http://localhost:5173', 'http://localhost:8000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -54,7 +66,8 @@ app.use((err, req, res, next) => {
 
 app.use('/stars', express.static(PUBLIC_STARS, {
   index: false,
-  extensions: ['png','jpg','jpeg','webp']
+  extensions: ['png','jpg','jpeg','webp'],
+  
 }));
 
 const authLimiter = rateLimit({
@@ -64,6 +77,14 @@ const authLimiter = rateLimit({
   legacyHeaders: false
 });
 app.use('/api/auth', authLimiter);
+
+const generalLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use('/api/', generalLimiter);
 
 
 const storage = multer.diskStorage({
@@ -88,13 +109,36 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB
 });
 
-const PORT = 3001;
-const server = http.createServer(app);
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Сервер запущен на http://localhost:${PORT}`);
-});
+async function startServer() {
+  try {
+    await connectToDatabase();
+    
+    const PORT = 4000;
+    const server = http.createServer(app);
 
-const wss = new WebSocket.Server({ server, verifyClient: (info, done) => done(true) });
+    const wss = new WebSocket.Server({ server, verifyClient: (info, done) => done(true) });
+
+    wss.on('connection', (ws) => {
+      console.log('Клиент подключен');
+      const cache = readCache();
+      ws.send(JSON.stringify(cache.posts)); 
+      ws.on('close', () => {
+        console.log('Клиент отключен');
+      });
+    });
+
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Сервер запущен на http://0.0.0.0:${PORT}`);
+    });
+    
+  } catch (err) {
+    console.error('❌ Не удалось запустить сервер:', err);
+    process.exit(1);
+  }
+}
+
+
+
 const CACHE_FILE = path.join(__dirname, 'cache.json');
 
 // Функция для чтения кэша
@@ -121,15 +165,163 @@ function writeCache(data) {
   fs.writeFileSync(CACHE_FILE, JSON.stringify(cacheData, null, 2));
 }
 
-wss.on('connection', (ws) => {
-  console.log('Клиент подключен');
-  // Отправляем текущие посты при подключении
-  const cache = readCache();
-  ws.send(JSON.stringify(cache.posts)); 
-  ws.on('close', () => {
-    console.log('Клиент отключен');
-  });
-});
+async function connectToDatabase() {
+  let retries = 10;
+  
+  while (retries > 0) {
+    try {
+      console.log(`🔌 Попытка подключения к БД (осталось попыток: ${retries})...`);
+      const client = await pool.connect();
+      console.log('✅ Успешное подключение к PostgreSQL');
+      
+      // Инициализируем базу данных
+      await initializeDatabase();
+      
+      client.release();
+      return;
+    } catch (err) {
+      console.error(`❌ Ошибка подключения: ${err.message}`);
+      retries--;
+      
+      if (retries === 0) {
+        console.error('❌ Не удалось подключиться к БД после всех попыток');
+        process.exit(1);
+      }
+      
+      console.log('⏳ Повторная попытка через 5 секунд...');
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+  }
+}
+
+async function initializeDatabase() {
+  try {
+    console.log('🔄 Инициализация структуры базы данных...');
+    
+    // Создаем таблицу products
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS products (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        price INTEGER NOT NULL,
+        color VARCHAR(50),
+        size VARCHAR(20),
+        image VARCHAR(255),
+        stock_quantity INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✅ Таблица products создана/проверена');
+
+    // Создаем остальные таблицы
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✅ Таблица users создана/проверена');
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS stars (
+        id VARCHAR(20) PRIMARY KEY,
+        color_hex VARCHAR(7) NOT NULL,
+        size VARCHAR(10) NOT NULL,
+        texture_id VARCHAR(20) NOT NULL,
+        accessory_id VARCHAR(20) NOT NULL,
+        price INTEGER NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✅ Таблица stars создана/проверена');
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS reviews_table (
+        id SERIAL PRIMARY KEY,
+        author VARCHAR(255) NOT NULL,
+        text TEXT NOT NULL,
+        rating INTEGER NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✅ Таблица reviews_table создана/проверена');
+
+    // Добавляем тестовые данные
+    await initializeSampleData();
+    
+    console.log('🎉 Инициализация базы данных завершена!');
+    
+  } catch (err) {
+    console.error('❌ Ошибка инициализации базы данных:', err);
+    throw err;
+  }
+}
+
+async function initializeSampleData() {
+  try {
+    const result = await pool.query('SELECT COUNT(*) as count FROM products');
+    const count = parseInt(result.rows[0].count);
+    
+    if (count === 0) {
+      console.log('🔄 Добавляем тестовые товары...');
+      
+      const sampleProducts = [
+        {
+          name: 'Ярко-рубиновая звезда',
+          description: 'Малый размер, 18-22см',
+          price: 5000,
+          color: 'ruby',
+          size: 'small',
+          image: '/stars/star6.jpg',
+          stock_quantity: 2,
+          is_active: true
+        },
+        {
+          name: 'Классическая золотая',
+          description: 'Средний размер, 27-33см',
+          price: 7500,
+          color: 'gold', 
+          size: 'medium',
+          image: '/stars/star3.jpg',
+          stock_quantity: 5,
+          is_active: true
+        },
+        {
+          name: 'Серебряная вечерняя',
+          description: 'Большой размер, 40-49см',
+          price: 10000,
+          color: 'silver',
+          size: 'large',
+          image: '/stars/star4.jpg',
+          stock_quantity: 3,
+          is_active: true
+        }
+      ];
+
+      for (const product of sampleProducts) {
+        await pool.query(
+          `INSERT INTO products (name, description, price, color, size, image, stock_quantity, is_active) 
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          [
+            product.name, product.description, product.price, 
+            product.color, product.size, product.image,
+            product.stock_quantity, product.is_active
+          ]
+        );
+      }
+      
+      console.log('✅ Добавлено тестовых товаров:', sampleProducts.length);
+    } else {
+      console.log('✅ В базе уже есть товары:', count);
+    }
+  } catch (err) {
+    console.error('❌ Ошибка добавления тестовых данных:', err);
+  }
+}
 
 app.post('/api/order', (req, res) => {
   const { productId } = req.body;
@@ -145,42 +337,38 @@ pool.connect((err) => {
   }
 });
 
-pool.query(`
-  CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  )
-`).catch(e => console.error('Ошибка создания таблицы users', e));
-
-pool.query(`
-  CREATE TABLE IF NOT EXISTS stars (
-    id VARCHAR(20) PRIMARY KEY,
-    color_hex VARCHAR(7) NOT NULL,
-    size VARCHAR(10) NOT NULL,
-    texture_id VARCHAR(20) NOT NULL,
-    accessory_id VARCHAR(20) NOT NULL,
-    price INTEGER NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  )
-`).catch(e => console.error('Ошибка создания таблицы stars', e));
-
-// app.use(express.json());
-
-// В файле с базой данных добавьте:
-pool.query(`
-  CREATE TABLE IF NOT EXISTS products (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    price INTEGER NOT NULL,
-    color VARCHAR(50),
-    image VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  )
-`).catch(e => console.error('Ошибка создания таблицы products', e));
-
+app.get('/api/debug/products-raw', async (req, res) => {
+  try {
+    console.log('🔍 Проверяем подключение к БД...');
+    
+    // Проверяем подключение
+    const client = await pool.connect();
+    console.log('✅ Подключение к БД установлено');
+    
+    // Выполняем простой запрос
+    const result = await client.query('SELECT COUNT(*) as count FROM products');
+    console.log('📊 Количество записей в products:', result.rows[0].count);
+    
+    // Получаем все товары
+    const productsResult = await client.query('SELECT * FROM products');
+    console.log('📦 Полученные товары:', productsResult.rows);
+    
+    client.release();
+    
+    res.json({
+      count: result.rows[0].count,
+      products: productsResult.rows,
+      connection: {
+        host: process.env.PGHOST,
+        database: process.env.PGDATABASE,
+        user: process.env.PGUSER
+      }
+    });
+  } catch (err) {
+    console.error('❌ Ошибка при проверке товаров:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.get('/api/test-db', async (req, res) => {
   try {
@@ -236,9 +424,9 @@ app.post('/api/reviews', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Server running on port ${port}`);
+// });
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'] || req.headers['Authorization'];
@@ -256,7 +444,7 @@ function authenticateToken(req, res, next) {
       console.log('JWT verify error:', err);
       return res.status(403).json({ error: 'Недействительный токен' });
     }
-    req.user = payload; // payload содержит { id, email }
+    req.user = payload;
     next();
   });
 }
@@ -287,12 +475,17 @@ pool.query('SELECT NOW()', (err, res) => {
 
 app.get('/api/products', async (req, res) => {
   try {
-    console.log('[DEBUG] Запрос на получение товаров'); 
+    console.log('[DEBUG] Запрос на получение товаров');
+
     const { rows } = await pool.query(`
-      SELECT * FROM products
+      SELECT 
+        id, name, description, price, color, size, image, created_at
+      FROM products 
       ORDER BY created_at DESC
     `);
 
+    console.log('[DEBUG] Получено записей из БД:', rows.length);
+    console.log('[DEBUG] Первая запись:', rows[0]);
     const productsWithDetails = rows.map(product => {
       const sizeMapping = {
         'small': 'Маленький (15-10см)',
@@ -807,3 +1000,44 @@ app.post('/api/test-email', async (req, res) => {
     });
   }
 });
+
+app.get('/api/debug/db-status', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    
+    // Проверяем подключение
+    const timeResult = await client.query('SELECT NOW() as current_time');
+    
+    // Проверяем таблицы
+    const tablesResult = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public'
+    `);
+    
+    client.release();
+    
+    res.json({
+      status: 'OK',
+      databaseTime: timeResult.rows[0].current_time,
+      tables: tablesResult.rows.map(row => row.table_name),
+      connection: {
+        host: process.env.PGHOST,
+        database: process.env.PGDATABASE,
+        user: process.env.PGUSER
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      status: 'ERROR', 
+      error: err.message,
+      connection: {
+        host: process.env.PGHOST,
+        database: process.env.PGDATABASE,
+        user: process.env.PGUSER
+      }
+    });
+  }
+});
+
+startServer();

@@ -1,12 +1,9 @@
 <template>
   <section class="footer" data-theme="dark">
     <div class="footer-container">
-      
-      <!-- Верхний блок: CTA + Быстрые ссылки -->
       <div class="footer-top">
         <div class="footer-cta">
           <h3>Рождественские звезды на Вашу ёлку</h3>
-          <!-- <p>Уникальный дизайн, ручная работа, подарочная упаковка.</p> -->
           <div class="cta-buttons">
             <router-link to="/create" class="btn btn-primary">СОБРАТЬ ЗВЕЗДУ</router-link>
             <router-link to="/products" class="btn btn-secondary">ВЫБРАТЬ ГОТОВУЮ</router-link>
@@ -26,59 +23,27 @@
                 </div>
             </div>
             <router-link to="/reviews">Отзывы</router-link>
-
         </nav>
       </div>
-
-      <!-- Основная сетка -->
       <div class="footer-grid">
         
         <!-- О бренде -->
         <section class="col about">
           <h4>О бренде</h4>
-          <p>Мы создаём авторские ёлочные звёзды вручную. Каждая звезда — это уют, который остаётся с вами на многие зимы. <br>Каждая звезда уникальная и выполнена руками мастера. Для каждой звезды своя подарочная упаковка! </p>
-
-         
-
-          <!-- <form class="newsletter" @submit.prevent>
-            <label for="newsletter-email" class="sr-only">Подписка на новости</label>
-            <input id="newsletter-email" type="email" placeholder="Ваш e-mail" autocomplete="email" required>
-            <button type="submit" class="btn btn-outline">Подписаться</button>
-          </form> -->
+          <p>Мы создаём авторские ёлочные звёзды вручную. Каждая звезда — это уют, который остаётся с вами на многие зимы. <br> Все звезды уникальны и выполнены руками мастера. Для каждого изделия своя подарочная упаковка! </p>
         </section>
 
-        <!-- Полезное -->
-        <!-- <section class="col useful">
-          <h4>Полезное</h4>
-          <router-link to="/terms">Пользовательское соглашение</router-link>
-          <router-link to="/privacy">Политика конфиденциальности</router-link>
-          <router-link to="/returns">Возврат и гарантия</router-link>
-        </section> -->
-
-        <!-- Доставка -->
-        <!-- <section class="col delivery">
-          <h4>Доставка</h4>
-          <ul class="delivery-list">
-            <li><strong>Москва и МО:</strong> курьер 1–2 дня</li>
-            <li><strong>Россия:</strong> СДЭК / Почта РФ 3–7 дней</li>
-            <li><strong>Мир:</strong> DHL / UPS 7–14 дней</li>
-          </ul>
-          <p class="small">Стоимость и сроки рассчитываются при оформлении заказа по адресу доставки.</p>
-        </section> -->
+        <section class="col about">
+          <h4>Как пользоваться сайтом?</h4>
+          <p>Во вкладке ТОВАРЫ можно выбрать готовую звезду, которую мы отправим Вам в ближайшее время.<br> Если же в ТОВАРАХ подходящей звезды нет, всегда можно СОБРАТЬ ЗВЕЗДУ в одноименной вкладке.</p>  
+        </section>
       </div>
 
-      <!-- Нижняя часть -->
       <div class="footer-bottom">
-        <div class="payments" aria-label="Платёжные системы">
-          <img src="/icons/payments/card.png" alt="Visa">
-          <img src="/icons/payments/sbp.jpg" alt="SBP">
-          <img src="/icons/payments/yomoney.png" alt="SBP">
-        </div>
-
         <div class="legal">
-          <p>© 2025 Авторские Звёзды. Все права защищены.</p>
-          <p>ИП Иванов Иван Иванович, ОГРН 0000000000000, ИНН 000000000000</p>
-        </div>
+          <p>© 2025 звезда-на-елку.рф. Все права защищены.</p>
+          <p>С заботой о Вашем празднике!</p>
+        </div> 
 
       </div>
     </div>
@@ -96,8 +61,8 @@
   color: #ffffff;
   width: 100%;
   padding: 40px 20px;
-  min-height: 100vh; /* чтобы футер был секцией */
-  scroll-snap-align: start; /* если используешь snap */
+  min-height: 100vh;
+  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -109,39 +74,25 @@
   padding: 56px 24px 32px;
 }
 
-/* режим футера на лендинге
-.footer-snap {
-  height: 100vh;
-  scroll-snap-align: start;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-} */
-
-/* обычный подвал */
 .footer-regular {
   padding: 40px 20px;
-  /* color:#911796; */
 }
 
 
 .footer.site-footer {
-  background: #0E2A1F; /* премиальный тёмно-зелёный */
+  background: #0E2A1F;
   color: #FFFFFF;
   width: 100%;
   padding: 56px 24px 32px;
 }
 
 .footer-container {
-    
+
   max-width: 1200px;
   margin: 0 auto;
 }
-
 .footer-top {
-    margin-top: 20vh;
-
-
+  margin-top: 20vh;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -260,10 +211,12 @@
 /* Grid */
 .footer-grid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 32px;
   padding: 28px 0;
 }
+
+
 
 .footer-grid .col h4 {
   margin: 0 0 12px 0;
@@ -329,7 +282,7 @@
     margin-bottom: 20vh;
 
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: 1fr;
   gap: 16px;
   align-items: center;
   padding-top: 18px;

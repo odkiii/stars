@@ -127,27 +127,52 @@ onMounted(async () => {
   try {
     const mod = await import("@studio-freight/lenis");
     const Lenis = mod.default ?? mod;
+    
     lenisInstance = new Lenis({
-      duration: 1.1,
+      duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      smoothTouch: false,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.5,
+      normalizeWheel: true,
+      infinite: false,
     });
-    function raf(t) {
-      lenisInstance.raf(t);
-      requestAnimationFrame(raf);
+
+    let rafId;
+    function raf(time) {
+      if (lenisInstance) {
+        lenisInstance.raf(time);
+      }
+      rafId = requestAnimationFrame(raf);
     }
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
+
+    // Сохраняем ID для очистки
+    lenisInstance.rafId = rafId;
+
   } catch (e) {
-    // если Lenis не установлен — ничего страшного
-    // console.warn('Lenis not available', e);
+    console.warn('Lenis not available', e);
   }
 });
 
 onBeforeUnmount(() => {
   if (observer) observer.disconnect();
-  if (lenisInstance && lenisInstance.destroy) lenisInstance.destroy();
+  
+  // Правильная очистка Lenis
+  if (lenisInstance) {
+    if (lenisInstance.rafId) {
+      cancelAnimationFrame(lenisInstance.rafId);
+    }
+    if (lenisInstance.destroy) {
+      lenisInstance.destroy();
+    }
+    lenisInstance = null;
+  }
 });
 
-// (если нужно) методы меню — можно реализовать здесь
 </script>
 
 <style>
@@ -193,12 +218,17 @@ header[data-theme="light"] .nav-link {
 header[data-theme="dark"] .nav-link {
   color: #daf8ed;
 }
+* {
+  box-sizing: border-box;
+}
 
 /* базовые глобальные стили, минимально переработанные */
 html,
 body,
 #app {
   height: 100%;
+  scroll-behavior: smooth;
+
   
 }
 body {

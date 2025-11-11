@@ -1,0 +1,216 @@
+Folder PATH listing for volume Data
+Volume serial number is DC42-8EAB
+D:.
+|   .dockerignore
+|   .env
+|   .gitignore
+|   docker-compose.yml
+|   Dockerfile.frontend
+|   index.html
+|   jsconfig.json
+|   nginx.conf
+|   package-lock.json
+|   package.json
+|   README.md
+|   vite.config.js
+|   yarn.lock
+|   ?????????.txt
+|   
++---.vscode
+|       c_cpp_properties.json
+|       extensions.json
+|       settings.json
+|       
++---backend
+|   |   cache.json
+|   |   Dockerfile.backend
+|   |   package-lock.json
+|   |   package.json
+|   |   server.js
+|   |   
+|   |   +---public
+|   |       index.html
+|   |       
+|   +---stars
+|   |       1752914569404.jpg
+|   |       1753023109361.jpg
+|   |       star1.jpg
+|   |       star2.jpg
+|   |       star3.jpg
+|   |       star4.jpg
+|   |       
+|   \---uploads
+|       |   215285ce74b0f32117680e6a47b06736
+|       |   69925cd59be3d85b38587a9560f3a2f4
+|       |   99a27979e807ed0c435cf21a20783282
+|       |   
+|       \---stars
++---db
+|   \---backups
++---logs
++---public
+|   |   back.jpg
+|   |   back1.jpg
+|   |   back2.jpg
+|   |   no-photo.png
+|   |   
+|   +---acs
+|   |       half_pearls_white.jpg
+|   |       pearls_gold.jpg
+|   |       ruby_beads.jpg
+|   |       
+|   +---colors
+|   |       gold.png
+|   |       pearl.png
+|   |       ruby.png
+|   |       silver.png
+|   |       
+|   +---fonts
+|   |       Miss_Katherine_Cyrillic_Script.ttf
+|   |       PassionsConflictRUS-Regular.otf
+|   |       Solena-Regular.ttf
+|   |       
+|   +---hdri
+|   |       blouberg_sunrise_blur_1_2k.hdr
+|   |       rooftop_night_blur_2k.hdr
+|   |       
+|   +---icons
+|   |   |   cart.png
+|   |   |   favicon.ico
+|   |   |   heart.png
+|   |   |   logo.png
+|   |   |   logo1.png
+|   |   |   logo_black.png
+|   |   |   profile.png
+|   |   |   size1.png
+|   |   |   size2.png
+|   |   |   size3.png
+|   |   |   telegram.png
+|   |   |   whatsapp.png
+|   |   |   
+|   |   \---payments
+|   |           card.png
+|   |           sbp.jpg
+|   |           yomoney.png
+|   |           
+|   +---models
+|   |   |   small_star.glb
+|   |   |   
+|   |   +---large
+|   |   |       gold_glossy.glb
+|   |   |       gold_glossy_pearls.glb
+|   |   |       pearl_glossy.glb
+|   |   |       pearl_glossy_pearls.glb
+|   |   |       red_glossy.glb
+|   |   |       red_glossy_rubybeads.glb
+|   |   |       silver_glossy.glb
+|   |   |       silver_glossy_pearls.glb
+|   |   |       
+|   |   +---medium
+|   |   |       gold_glossy.glb
+|   |   |       gold_glossy_pearls.glb
+|   |   |       pearl_glossy.glb
+|   |   |       pearl_glossy_pearls.glb
+|   |   |       red_glossy.glb
+|   |   |       red_glossy_rubybeads.glb
+|   |   |       silver_glossy.glb
+|   |   |       silver_glossy_pearls.glb
+|   |   |       
+|   |   \---small
+|   |           gold_glossy.glb
+|   |           gold_glossy_pearls.glb
+|   |           pearl_glossy.glb
+|   |           pearl_glossy_pearls.glb
+|   |           red_glossy.glb
+|   |           red_glossy_rubybeads.glb
+|   |           silver_glossy.glb
+|   |           silver_glossy_pearls.glb
+|   |           
+|   +---stars
+|   |       back_tree.png
+|   |       custom_star.jpg
+|   |       hero_star.png
+|   |       hero_starNO.png
+|   |       photo_2025-08-28_22-05-15.jpg
+|   |       products_stars.png
+|   |       silver_star.png
+|   |       size_giant_landing.jpg
+|   |       size_small_landing.jpg
+|   |       size_standard_landing.jpg
+|   |       sss.png
+|   |       star1.jpg
+|   |       star2.jpg
+|   |       star3.jpg
+|   |       star4.jpg
+|   |       star5.jpg
+|   |       star6.jpg
+|   |       star_on_tree.jpg
+|   |       stick.png
+|   |       ??????.png
+|   |       ??????.PNG
+|   |       ?.png
+|   |       
+|   \---textures
+|           aged_silver.jpg
+|           antique_gold.jpg
+|           glossy_gold.jpg
+|           glossy_red.jpg
+|           glossy_silver.jpg
+|           
+\---src
+    |   App.vue
+    |   main.js
+    |   
+    +---assets
+    |   |   base.css
+    |   |   fonts.css
+    |   |   logo.svg
+    |   |   main.css
+    |   |   
+    |   \---colors
+    |           gold.png
+    |           pearl.png
+    |           ruby.png
+    |           silver.png
+    |           
+    +---components
+    |   |   AccessoriesPicker.vue
+    |   |   CartList.vue
+    |   |   ColorPicker.vue
+    |   |   Footer.vue
+    |   |   ProductItem.vue
+    |   |   ProductList.vue
+    |   |   QuickViewModal.vue
+    |   |   ReviewForm.vue
+    |   |   ReviewList.vue
+    |   |   SearchBar.vue
+    |   |   SizePicker.vue
+    |   |   StarRating.vue
+    |   |   TexturePicker.vue
+    |   |   
+    |   \---icons
+    |           IconCommunity.vue
+    |           IconDocumentation.vue
+    |           IconEcosystem.vue
+    |           IconSupport.vue
+    |           IconTooling.vue
+    |           
+    +---router
+    |       index.js
+    |       
+    +---stores
+    |       cart.js
+    |       
+    \---views
+            AdminPanel.vue
+            CartView.vue
+            ContactsView.vue
+            HomeView.vue
+            LandingView.vue
+            ProductPage.vue
+            ProductView.vue
+            ProfileView.vue
+            ReadyStarsView.vue
+            ReviewsView.vue
+            StarCreatorView.vue
+            

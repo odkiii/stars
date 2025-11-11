@@ -51,7 +51,7 @@ export default {
       const scaleMap = {
         small: 1.2,
         medium: 1.2,
-        large: 1.5
+        large: 1.35
       };
       return scaleMap[sizeId] || 1;
     },
@@ -98,7 +98,7 @@ export default {
 .size-option.selected {
   border-color: #58bb92;
   box-shadow: 0 0 0 3px rgba(76, 175, 159, 0.349);
-  transform: scale(1.09) !important;
+  transform: scale(1.15) !important;
 }
 
 .star-container {

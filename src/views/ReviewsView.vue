@@ -19,7 +19,7 @@ export default {
   },
   async created() {
     try {
-      const response = await fetch('http://localhost:3001/api/reviews');
+      const response = await fetch('api/reviews');
       if (!response.ok) throw new Error('Не удалось загрузить отзывы');
 
       this.reviews = await response.json();
@@ -30,7 +30,7 @@ export default {
   methods: {
     async addReview(newReview) {
       try {
-        const response = await fetch('http://localhost:3001/api/reviews', {
+        const response = await fetch('/api/reviews', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newReview)

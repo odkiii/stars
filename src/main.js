@@ -13,5 +13,10 @@ pinia.use(piniaPluginPersistedstate);
 
 const app = createApp(App)
 app.use(router)
-app.use(Notifications)
+app.use(Notifications, {
+    duration: 10000,
+    width: 400,
+    height: 80,
+    max: 5
+})
 app.mount('#app')

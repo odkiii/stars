@@ -39,15 +39,15 @@
             </div>
 
             <div class="params-section text-acs">
-              <h3>ТЕКСТУРА</h3>
-              <h3>ОФОРМЛЕНИЕ</h3>
+              <!-- <h3>ТЕКСТУРА</h3> -->
+              <h3>ЖЕМЧУЖИНЫ НА ЛУЧАХ</h3>
               
-              <texture-picker
+              <!-- <texture-picker
                 :textures="currentTextures"
                 :selected-texture="currentDesign.texture"
                 @update:selectedTexture="currentDesign.texture = $event"
                 :disabled="isLoading"
-              />
+              /> -->
               <accessories-picker
                 :accessories="currentAccessories"
                 :selected-accessory="currentDesign.accessory"
@@ -58,7 +58,7 @@
 
             <div class="summary">
               <button class="add-to-cart" @click="addToCart">
-                ДОБАВИТЬ В КОРЗИНУ
+                ДОБАВИТЬ В КОРЗИНУ - <b>{{ currentPrice }} </b> ₽
               </button>
             </div>
             
@@ -107,13 +107,13 @@
             </div>
           </div>
 
-          <button class="add-to-cart" @click="addToCart">Добавить в корзину</button>
+          <button class="add-to-cart" @click="addToCart">- {{ currentPrice }} ₽</button>
         </div>
 
     </div>
   </div>
   <div class="mobile-overlay">
-    <p>Поверните устройство или зайдите с компьютера</p>
+    <p>Поверните устройство или зайдите с компьютера<br>Экран слишком узкий</br></p>
   </div>
   </template>
   
@@ -155,7 +155,7 @@ export default {
           preview: '/colors/gold.png',
           textures: [
             { id: 'glossy', name: 'Глянец', icon: '/textures/glossy_gold.jpg' },
-            { id: 'antique', name: 'Античное золото', icon: '/textures/antique_gold.jpg' }
+            // { id: 'antique', name: 'Античное золото', icon: '/textures/antique_gold.jpg' }
           ],
           accessories: [
             { id: 'pearls', name: 'Жемчужины на лучах', icon: '/acs/pearls_gold.jpg' }
@@ -170,10 +170,10 @@ export default {
           preview: '/colors/silver.png',
           textures: [
             { id: 'glossy', name: 'Глянец', icon: '/textures/glossy_silver.jpg' },
-            { id: 'aged', name: 'Состаренное серебро', icon: '/textures/aged_silver.jpg' }
+            // { id: 'aged', name: 'Состаренное серебро', icon: '/textures/aged_silver.jpg' }
           ],
           accessories: [
-            { id: 'pearls', name: 'Жемчужины на лучах', icon: '/acs/pearls_silver.png' }
+            { id: 'pearls', name: 'Жемчужины на лучах', icon: '/acs/pearls_silver.jpg' }
           ],
           defaultTexture: 'glossy',
           defaultAccessory: 'pearls'
@@ -201,7 +201,7 @@ export default {
             { id: 'glossy', name: 'Глянец', icon: '/textures/pearl_glossy.jpg' }
           ],
           accessories: [
-            { id: 'pearls', name: 'Жемчужины на лучах', icon: '/acs/pearls.png' }, //
+            { id: 'pearls', name: 'Жемчужины на лучах', icon: '/acs/pearls_pearl.png' }, //
           ],
           defaultTexture: 'glossy',
           defaultAccessory: 'pearls'
@@ -253,12 +253,20 @@ export default {
     
   },
   computed: {
+    currentPrice() {
+      const priceMap = {
+        small: 5000,
+        medium: 7500, 
+        large: 10000
+      };
+      return priceMap[this.currentDesign.size] || 5000;
+    },
     colorOptionsForPicker() {
       return Object.values(this.colorConfigurations).map(config => ({
         hex: config.hex,
         id: config.id,
         name: config.name,
-        image: config.textures[0]?.icon // или другая иконка
+        image: config.textures[0]?.icon
       }));
     },
     getSizeMultiplier() {
@@ -359,9 +367,7 @@ export default {
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
     },
-    // StarCreatorView.vue
     generateStarId() {
-      // Маппинг цветов
       const colorMap = {
         '#FFD700': 'C1', // gold
         '#C0C0C0': 'C2', // silver
@@ -544,115 +550,6 @@ export default {
         this.controls.update();
       }
     },
-    
-
-    // updateLightingBasedOnColor() {
-    //   console.group('updateLightingBasedOnColor');
-
-    //   if (!this.threeScene || !this.currentDesign?.color) {
-    //     console.warn('threeScene или color не инициализированы');
-    //     console.groupEnd();
-    //     return;
-    //   }
-
-    //   const currentColor = this.currentDesign.color;
-    //   const isSoft = this.isSoftColor(currentColor);
-
-    //   console.log(`Цвет: ${currentColor}, мягкий свет: ${isSoft}`);
-      
-    //   if (isSoft) {
-    //     try {
-    //       console.log(`Ставлю мягкое освещение`);
-
-    //       this.setupSoftLighting();
-    //     }
-    //     catch (error) {
-    //       console.error(`Не получилось:`, error)
-    //     }
-        
-    //   } else {
-    //     console.log(`Ставлю обычное освещение`);
-
-    //     this.setupIntenseLighting();
-    //   }
-
-    //   console.groupEnd();
-    // },
-
-    
-
-    // setupIntenseLighting() {
-    //   if (!this.threeScene) {
-    //     console.warn('threeScene ещё не создана — интенсивный свет не установлен');
-    //     return;
-    //   }
-
-    //   if (this.threeScene) {
-    //     this.clearCurrentLights();
-    //   }
-
-
-  
-    //   const directionalLight = new THREE.DirectionalLight(0xffddaa, 10);
-    //   const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
-
-    //   const directionalLight1 = new THREE.DirectionalLight(0xffddaa, 10);
-    //   const directionalLightHelper1  = new THREE.DirectionalLightHelper(directionalLight1, 1);
-
-    //   const directionalLight2 = new THREE.DirectionalLight(0xffddaa, 10);
-    //   const directionalLightHelper2 = new THREE.DirectionalLightHelper(directionalLight2, 1);
-
-    //   const directionalLight3 = new THREE.DirectionalLight(0xffddaa, 10);
-    //   const directionalLightHelper3  = new THREE.DirectionalLightHelper(directionalLight3, 1);
-
-
-    //   directionalLight.position.set(3, 1, -3);
-    //   directionalLightHelper.position.set(directionalLight);
-
-    //   directionalLight1.position.set(-3, 0, -3);
-    //   directionalLightHelper1.position.set(directionalLight1);
-
-    //   directionalLight2.position.set(-3, 1, 3);
-    //   directionalLightHelper2.position.set(directionalLight2);
-
-    //   directionalLight3.position.set(3, 0, 3);
-    //   directionalLightHelper3.position.set(directionalLight3);
-      
-    //   this.threeScene.add(directionalLight);
-    //   this.threeScene.add(directionalLight1);
-    //   this.threeScene.add(directionalLight2);
-    //   this.threeScene.add(directionalLight3);
-
-    //   this.threeScene.add(directionalLightHelper);
-    //   this.threeScene.add(directionalLightHelper1);
-    //   this.threeScene.add(directionalLightHelper2);
-    //   this.threeScene.add(directionalLightHelper3);
-
-    //   this.intenseLights = [ directionalLight, directionalLight1, directionalLight2, directionalLight3, directionalLightHelper, directionalLightHelper1, directionalLightHelper2, directionalLightHelper3];
-
-
-    // },
-
-    
-
-    // setupSoftLighting() {
-    //   if (!this.threeScene) return;
-
-    //   this.clearCurrentLights();
-
-    //   // const ambient = new THREE.AmbientLight(0xffffff, 0.5);
-    //   const directional = new THREE.DirectionalLight(0xffffff, 2);
-    //   const directionalLightHelper007 = new THREE.DirectionalLightHelper(directional, 1);
-
-    //   directional.position.set(1, 0, 3);
-
-    //   // this.threeScene.add(ambient);
-    //   this.threeScene.add(directional);
-    //   this.threeScene.add(directionalLightHelper007)
-
-    //   this.softLights = [ directional, directionalLightHelper007];
-    // },
-
     // Вспомогательный метод для проверки цвета
     isSoftColor(color) {
       const softColors = ['#FDF5E6', '#FF6347'];
@@ -1016,20 +913,27 @@ export default {
         config => config.hex === this.currentDesign.color
       );
       
-      // Получаем названия текстур и аксессуаров
       const textureConfig = this.currentTextures.find(t => t.id === this.currentDesign.texture);
       const accessoryConfig = this.currentAccessories.find(a => a.id === this.currentDesign.accessory);
       
-      // Получаем название размера
       const sizeConfig = this.sizes.find(s => s.id === this.currentDesign.size);
       
+      const colorImageMap = {
+        '#FFD700': '/stars/gold_star.png',
+        '#C0C0C0': '/stars/silver_star.png', 
+        '#FF6347': '/stars/ruby_star.png',
+        '#FDF5E6': '/stars/pearl_star.png'
+      };
+      
+      const starImage = colorImageMap[this.currentDesign.color] || '/stars/silver_star.png';
+
       if (existingItem) {
         existingItem.quantity += 1;
       } else {
         cart.push({
           id: starId,
           name: `Кастомная звезда (${colorConfig.name})`,
-          price: 5000,
+          price: this.currentPrice,
           configuration: {
             color: this.currentDesign.color,
             color_name: colorConfig.name,
@@ -1041,14 +945,15 @@ export default {
             accessory_name: accessoryConfig?.name || this.currentDesign.accessory
           },
           quantity: 1,
-          is_custom: true // Флаг кастомного товара
+          is_custom: true,
+          image: starImage
         });
       }
       
       localStorage.setItem('cart', JSON.stringify(cart));
       
       try {
-        await fetch('http://localhost:3001/api/stars', {
+        await fetch('/api/stars', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1057,7 +962,7 @@ export default {
             size: this.currentDesign.size,
             texture_id: this.currentDesign.texture,
             accessory_id: this.currentDesign.accessory,
-            price: 5000
+            price: this.currentPrice
           })
         });
       } catch (error) {
@@ -1224,10 +1129,11 @@ html, body {
   border-radius: 40px;
   background: rgba(255, 255, 255, 0.9);
   color: #333;
-  font-weight: bold;
+  /* font-weight: bold; */
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(5px);
+  font-size: 1.1rem; 
 }
 
 .add-to-cart:hover {
@@ -1237,10 +1143,10 @@ html, body {
 }
 
 
-.text-acs{
+/* .text-acs{
   display: grid;
   grid-template-columns: 50% 50%;
-  }
+  } */
 
 .loading-overlay {
   position: absolute;

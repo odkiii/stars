@@ -26,7 +26,14 @@
           </div>
         </div>
       </div>
-      
+      <div class="scroll-indicator" @click="scrollToNextSection">
+        <div class="scroll-arrow">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19M12 19L19 12M12 19L5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="scroll-text">Листайте вниз</span>
+      </div>
     </section>
 
     <!-- Блок 2 -->
@@ -101,6 +108,16 @@ const structuredData = {
       }
     }
   ]
+}
+
+const scrollToNextSection = () => {
+  const nextSection = document.querySelector('.tree-section')
+  if (nextSection) {
+    nextSection.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    })
+  }
 }
 </script>
 
@@ -189,6 +206,78 @@ const structuredData = {
   margin: -0.2rem 0 0.6rem 0;
   color: #6b0630;
   line-height: 0.95;
+}
+.scroll-indicator {
+  position: absolute;
+  bottom: 200px;
+  left: 75%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  animation: fadeInUp 1s ease-out 1s both;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.scroll-indicator:hover {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-5px);
+}
+
+.scroll-arrow {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #6b0630;
+  border-radius: 50%;
+  color: #6b0630;
+  margin-bottom: 8px;
+  animation: bounce 2s infinite;
+  transition: all 0.3s ease;
+}
+
+.scroll-indicator:hover .scroll-arrow {
+  background: #6b0630;
+  color: white;
+  transform: scale(1.1);
+}
+
+.scroll-text {
+  font-size: 14px;
+  color: #6b0630;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Анимация появления */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 0.8;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Анимация подпрыгивания */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
 }
 
 .button-group {

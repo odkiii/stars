@@ -118,7 +118,7 @@ export default {
     }
 
     try {
-      const userResponse = await fetch('http://localhost:3001/api/auth/me', {
+      const userResponse = await fetch('/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -130,7 +130,7 @@ export default {
 
       console.log('Получен пользователь:', this.user);
 
-      const ordersResponse = await fetch(`http://localhost:3001/api/orders/user/${this.user.id}`, {
+      const ordersResponse = await fetch(`/api/orders/user/${this.user.id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -182,8 +182,8 @@ export default {
     },
     async handleSubmit() {
       const url = this.isLogin 
-        ? 'http://localhost:3001/api/auth/login'
-        : 'http://localhost:3001/api/auth/register';
+        ? '/api/auth/login'
+        : '/api/auth/register';
 
       try {
         this.error = null;
@@ -210,7 +210,7 @@ export default {
         }
 
         // ✅ Получаем пользователя и сразу сохраняем в this.user
-        const me = await fetch('http://localhost:3001/api/auth/me', {
+        const me = await fetch('/api/auth/me', {
           headers: { 'Authorization': `Bearer ${data.token}` }
         });
         if (!me.ok) throw new Error('Не удалось получить данные пользователя');
@@ -218,7 +218,7 @@ export default {
         this.user = await me.json();  // ⬅️ ЭТО главный переключатель
 
         // ✅ Загружаем заказы
-        const ordersRes = await fetch(`http://localhost:3001/api/orders/user/${this.user.id}`, {
+        const ordersRes = await fetch(`/api/orders/user/${this.user.id}`, {
           headers: { 'Authorization': `Bearer ${data.token}` }
         });
         if (ordersRes.ok) {

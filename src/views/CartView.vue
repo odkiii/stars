@@ -15,15 +15,20 @@
       <h2 class="header-title" style="color:darkgray; font-size: medium;">Прошу обратить внимание! Все звезды уникальны, каждая делается художником вручную. Точное повторение звезды невозможно.</h2>
     
     <div class="recovery-box">
-      <input 
-        v-model="starIdInput"
-        placeholder="Введите ID звезды"
-        class="recovery-input"
-      >
+      <div class="recovery-input-wrapper">
+        <input 
+          v-model="starIdInput"
+          placeholder="Введите ID звезды"
+          class="recovery-input"
+        >
+        <button class="info-btn" @click="showInfoModal = true" title="Как работает ID?">
+          <span class="info-icon">i</span>
+        </button>
+      </div>
       <button @click="loadStar" class="recovery-button">
         Загрузить звезду
       </button>
-  </div>
+    </div>
     <CartList 
       :items="cartItems" 
       @remove-item="removeFromCart"
@@ -49,7 +54,7 @@
                 v-model="orderData.firstName" 
                 type="text" 
                 class="form-input"
-                placeholder="Иван Иванов"
+                placeholder="Например: Иван Иванов"
                 required
               >
             </div>
@@ -60,7 +65,7 @@
                 v-model="orderData.phone" 
                 type="tel" 
                 class="form-input"
-                placeholder="+7 (900) 123-45-67"
+                placeholder="Например: +7 (900) 123-45-67"
                 pattern="[+]{0,1}[0-9\s\-]+" 
                 required
               >
@@ -72,7 +77,7 @@
                 v-model="orderData.comment" 
                 type="text" 
                 class="form-input"
-                placeholder="Почта РФ, Московская область"
+                placeholder="Например: Почта РФ, Московская область или Курьер в Москве, внутри МКАД"
                 required
               >
             </div>
@@ -85,6 +90,56 @@
               </button>
             </div>
           </form>
+        </div>
+      </div>
+      <!-- Модальное окно информации об ID -->
+      <div v-if="showInfoModal" class="modal-overlay" @click.self="showInfoModal = false">
+        <div class="modal-content info-modal">
+          <div class="modal-header">
+            <h2>Как работает ID звезды?</h2>
+            <button class="close-btn" @click="showInfoModal = false">&times;</button>
+          </div>
+          
+          <div class="info-content">
+            <div class="info-section">
+              <h3>💾 Сохранение вашей звезды</h3>
+              <p>Корзина хранится только на этом устройстве. Если вы создали звезду на другом устройстве или хотите сохранить её надолго — используйте ID!</p>
+            </div>
+
+            <div class="info-section">
+              <h3>🔍 Расшифровка ID</h3>
+              <div class="id-example">
+                <div class="id-part">
+                  <span class="id-letter">C</span>
+                  <span class="id-meaning">Цвет (1-4)</span>
+                </div>
+                <div class="id-part">
+                  <span class="id-letter">S</span>
+                  <span class="id-meaning">Размер (1-3)</span>
+                </div>
+                <div class="id-part">
+                  <span class="id-letter">T</span>
+                  <span class="id-meaning">Текстура (1-4)</span>
+                </div>
+                <div class="id-part">
+                  <span class="id-letter">A</span>
+                  <span class="id-meaning">Аксессуар (1-4)</span>
+                </div>
+              </div>
+              <p class="example-text">Пример: <strong>C1S2T1A1</strong> — золотая звезда среднего размера</p>
+            </div>
+
+            <div class="info-section">
+              <h3>💡 Как использовать</h3>
+              <p>Сохраните ID вашей звезды в заметках или перешлите себе в сообщениях. В любой момент вы сможете загрузить её обратно!</p>
+            </div>
+          </div>
+
+          <div class="info-actions">
+            <button class="btn btn-primary" @click="showInfoModal = false">
+              Понятно!
+            </button>
+          </div>
         </div>
       </div>
 
@@ -103,7 +158,8 @@ data() {
   return {
     cartItems: [],
     showCheckoutModal: false,
-    showAuthModal: false, // новое поле для модального окна аутентификации
+    showAuthModal: false,
+    showInfoModal: false,
     starIdInput: '',
     // Данные формы
     authData: {
@@ -140,7 +196,14 @@ data() {
     window.removeEventListener('cart-updated', this.loadCart)
   },
   methods: {
-    // Основной метод обработки заказа
+    openInfoModal() {
+      this.showInfoModal = true;
+    },
+    
+    closeInfoModal() {
+      this.showInfoModal = false;
+    },
+  // Основной метод обработки заказа
     async processOrder() {
       if (this.isLoading) return;
       
@@ -161,9 +224,7 @@ data() {
         await this.sendOrderToOwner();
         this.saveOrderToStorage();
 
-        
-        // 2. Открываем WhatsApp для клиента
-        this.openWhatsApp();
+        // this.openWhatsApp();
         
         // 3. Очищаем корзину и закрываем модальное окно
         this.clearCart();
@@ -217,7 +278,7 @@ data() {
       };
 
       try {
-        const response = await fetch('http://localhost:3001/api/send-order-email', {
+        const response = await fetch('/api/send-order-email', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -262,12 +323,12 @@ data() {
     },
 
     // Простое открытие WhatsApp без форматированного сообщения
-    openWhatsApp() {
-      const ownerPhone = '79258476457';
-      const whatsappUrl = `https://wa.me/${ownerPhone}`;
+    // openWhatsApp() {
+    //   const ownerPhone = '79258476457';
+    //   const whatsappUrl = `https://wa.me/${ownerPhone}`;
       
-      window.open(whatsappUrl, '_blank');
-    },
+    //   window.open(whatsappUrl, '_blank');
+    // },
 
     restoreOrderData() {
       const pendingOrder = localStorage.getItem('pendingOrder');
@@ -333,7 +394,7 @@ data() {
 
         console.log('Отправляемые данные заказа:', orderPayload);
 
-        const response = await fetch('http://localhost:3001/api/orders', {
+        const response = await fetch('/api/orders', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -364,7 +425,7 @@ data() {
     },
     async login() {
       try {
-        const response = await fetch('http://localhost:3001/api/auth/login', {
+        const response = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -391,7 +452,7 @@ data() {
 
     async register() {
       try {
-        const response = await fetch('http://localhost:3001/api/auth/register', {
+        const response = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -431,7 +492,7 @@ data() {
           throw new Error('Неверный формат ID звезды');
         }
         
-        const response = await fetch(`http://localhost:3001/api/stars/${this.starIdInput}`);
+        const response = await fetch(`/api/stars/${this.starIdInput}`);
         
         if (!response.ok) {
           throw new Error(`Ошибка сервера: ${response.status}`);
@@ -483,7 +544,7 @@ data() {
           items: this.cartItems
         }
 
-        const response = await fetch('http://localhost:3001/api/orders', {
+        const response = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderPayload)
@@ -525,7 +586,7 @@ data() {
     
     async checkout() {
       try {
-        const response = await fetch('http://localhost:3001/api/orders', {
+        const response = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ items: this.cartItems }) 
@@ -612,6 +673,12 @@ h2.header-title {
 }
 
 /* ===== ВОССТАНОВЛЕНИЕ ЗВЕЗДЫ ПО ID ===== */
+.recovery-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: min(360px, 90%);
+}
 .recovery-box {
   display: flex;
   justify-content: center;
@@ -650,6 +717,111 @@ h2.header-title {
 .recovery-button:hover {
   background: #2F553D;
   color: white;
+}
+
+
+.info-btn {
+  position: absolute;
+  right: 10px;
+  background: #2F553D;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.info-btn:hover {
+  background: #234237;
+  transform: scale(1.1);
+}
+
+.info-icon {
+  font-style: italic;
+  font-family: serif;
+}
+
+/* Стили для модального окна информации */
+.info-modal {
+  max-width: 500px;
+}
+
+.info-content {
+  padding: 10px 0;
+}
+
+.info-section {
+  margin-bottom: 25px;
+}
+
+.info-section h3 {
+  color: #2F553D;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.info-section p {
+  color: #555;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+/* Блок с примером ID */
+.id-example {
+  display: flex;
+  justify-content: space-between;
+  margin: 15px 0;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.id-part {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  min-width: 80px;
+}
+
+.id-letter {
+  background: #2F553D;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.id-meaning {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.3;
+}
+
+.example-text {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 8px;
+  border-left: 3px solid #2F553D;
+  margin-top: 15px;
+}
+
+.info-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 /* ===== ИТОГО И КНОПКА ОФОРМЛЕНИЯ ===== */
@@ -850,7 +1022,6 @@ h2.header-title {
 .social-icon.whatsapp { background: #E6F6EA; }
 .social-icon.telegram { background: #E8F2FA; }
 
-/* ===== КНОПКИ ФОРМЫ ===== */
 .form-actions {
   display: flex; justify-content: flex-end; gap: 12px; margin-top: 6px;
   flex-wrap: wrap;
@@ -949,6 +1120,12 @@ h2.header-title {
   gap: 14px; padding: 14px 0;
   border-bottom: 1px solid #ECF1EF;
 }
+
+.cart-item img{
+  width: 80px;
+  height: 80px;
+}
+
 .cart-item:last-child { border-bottom: none; }
 .cart-item .item-info h4 {
   margin: 0; color: #0E2A1F; font-size: 1rem; font-weight: 800;
@@ -977,8 +1154,38 @@ h2.header-title {
 
 /* ===== АДАПТИВ ===== */
 @media (max-width: 640px) {
+  .recovery-input-wrapper {
+    width: 100%;
+  }
+  
+  .id-example {
+    justify-content: center;
+  }
+  
+  .id-part {
+    min-width: 70px;
+  }
   .total { padding: 16px; }
   .form-actions { justify-content: stretch; }
   .form-actions .btn { flex: 1 1 auto; }
+}
+@media (max-width: 480px) {
+  .info-modal {
+    margin: 20px;
+  }
+  
+  .id-part {
+    min-width: 60px;
+  }
+  
+  .id-letter {
+    width: 25px;
+    height: 25px;
+    font-size: 0.9rem;
+  }
+  
+  .id-meaning {
+    font-size: 0.8rem;
+  }
 }
 </style>

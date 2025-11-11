@@ -110,7 +110,7 @@ export default {
   },
   methods: {
     async loadProducts() {
-      const response = await fetch('http://localhost:3001/api/products');
+      const response = await fetch('/api/products');
       this.products = await response.json();
     },
     handleImageUpload(e) {
@@ -136,7 +136,7 @@ export default {
         formData.append('color', this.currentProduct.color);
         formData.append('image', this.currentProduct.image);
         
-        const response = await fetch('http://localhost:3001/api/products', {
+        const response = await fetch('/api/products', {
           method: 'POST',
           body: formData
         });
@@ -183,7 +183,7 @@ export default {
       }
 
       try {
-        const response = await fetch(`http://localhost:3001/api/products/${this.editingProduct}`, {
+        const response = await fetch(`/api/products/${this.editingProduct}`, {
           method: 'PUT',
           body: formData
         });
@@ -201,7 +201,7 @@ export default {
     if (!confirm('Вы уверены, что хотите удалить этот товар?')) return;
     
     try {
-      const response = await fetch(`http://localhost:3001/api/products/${id}`, {
+      const response = await fetch(`/api/products/${id}`, {
         method: 'DELETE'
       });
 
